@@ -44,7 +44,7 @@ process index {
   file "${name}.index" into transcriptome_index
 
   script:
-  // TODO: add transcriptome index param to skip this process
+  // TODO: add `transcriptome_index` param & `when` to skip this
   """
   kallisto index -i ${name}.index ${transcriptome}
   """
@@ -64,7 +64,6 @@ process mapping {
 
   output:
   file "kallisto_${name}" into kallisto_out_dirs
-  file "kallisto_${name}/abundance.tsv" into counts
   file "stdout.txt" into kallisto_results
 
   script:
@@ -84,7 +83,7 @@ process gene_expression {
   publishDir params.outdir, mode: 'copy'
 
   input:
-  file('*.tsv') from counts.collect()
+  file('kallisto/') from kallisto_out_dirs.collect()
   file(annotation) from annotation
   file(rmarkdown) from rmarkdown
 
@@ -92,12 +91,7 @@ process gene_expression {
   file("{MultiQC,diffexpr-results.csv}") into results
 
   script:
-  // TODO: move the merging of the counts files to the mapping process
   """
-  head -n1 1.tsv > merged_abundances.tsv
-  for abundances in \$(ls *.tsv); do
-    tail -n+2 \$abundances >> merged_abundances.tsv
-  done
   # copy the rmarkdown into the pwd
   cp $rmarkdown tmp && mv tmp $rmarkdown
   R -e "rmarkdown::render('${rmarkdown}', params = list(counts='merged_abundances.tsv',annotation='${annotation}',condition='${params.condition}'))"

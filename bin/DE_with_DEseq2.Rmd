@@ -27,24 +27,13 @@ params$condition
 
 ### 1. Loading the counts
 
-We will be loading & preprocessing the counts file:
+We will be loading the abundances files:
 
 ```{r}
-counts <- read.csv(params$counts,
-                          sep              = "\t",
-                          header           = TRUE, 
-                          stringsAsFactors = FALSE, 
-                          check.names      = FALSE);
-
-# assign the rownames to the gene ID's & remove uncessary columns
-# rownames(counts) <- counts[,1]
-# counts <- counts[, -c(1:2)]
-
-# # replace colnames to just the SRA id
-# colnames(counts) <- sub("\\_.*", "", colnames(counts))
-
-# order the columns
-# counts <- counts[ , order(names(counts))]
+sample_ids <- dir(file.path('kallisto'))
+sample_ids <- sub("^kallisto_", "", sample_ids)
+sample_ids
+abundances <- file.path('kallisto', paste0('kallisto_', sample_ids), 'abundance.h5')
 ```
 
 ### 2. Loading the annotation
@@ -53,12 +42,6 @@ Then will have to load the information for the annotation. And make the read cou
 ```{r}
 # Load sample table with metadata
 sampleTable <- read.csv(params$annotation, row.names = 1)
-
-# Remove .bam from the filenames 
-# colnames(counts) <- gsub("Aligned\\.out\\.bam$" , "", colnames(counts))
-
-# Order the rows
-sampleTable <- sampleTable[ order(row.names(sampleTable)), ]
 ```
 
 We are going to make sure we analyse the exactly same samples we have between sample table and count data.
@@ -80,16 +63,39 @@ condition
 
 ## Differential Expression Analysis
 
-Now that we have prepared the sample and counts read data, we can start using DEseq2 as the library to perform Differential Expression analysis.
+Now that we have prepared the sample and counts read data, we can load the libraries including the DEseq2 to perform Differential Expression analysis.
 
 ```{r}
-suppressMessages(library(DESeq2))
+suppressMessages({
+  library(biomaRt)
+  library(DESeq2)
+  library(dplyr)
+  library(tximport)
+})
 ```
 
-First we create the DEseq dataset object using the read counts and the sample data.
+Firstm we'll load the gene info
+
+```{r cache=TRUE}
+mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+  dataset = "hsapiens_gene_ensembl",
+  host = "may2015.archive.ensembl.org")
+ttg <- biomaRt::getBM(
+  attributes = c("ensembl_transcript_id", "transcript_version",
+  "ensembl_gene_id", "external_gene_name", "description",
+  "transcript_biotype"),
+  mart = mart)
+ttg <- dplyr::select(ttg, TXNAME = ensembl_transcript_id,
+  GENEID = ensembl_gene_id)
+head(ttg)
+```
+
+
+Next, we create the DEseq dataset object using the abundances and the sample data.
 
 ```{r}
-dds <- DESeqDataSetFromMatrix(countData=countdata, colData=sampleTable, design= as.formula(paste("~", params$condition)))
+txi_kallisto <- tximport(abundances, type='kallisto', tx2gene=ttg)
+dds <- DESeqDataSetFromTximport(txi=txi_kallisto, colData=sampleTable, design= as.formula(paste("~", params$condition)))
 dds
 ```
 

@@ -4,4 +4,4 @@ LABEL authors="phil@lifebit.ai" \
 
 COPY environment.yml /
 RUN conda env create -f /environment.yml && conda clean -a
-ENV PATH /opt/conda/envs/dean/bin:$PATH
+ENV PATH /opt/conda/envs/pathway-analysis/bin:$PATH

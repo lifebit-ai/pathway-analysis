@@ -32,8 +32,8 @@ We will be loading the abundances files:
 ```{r}
 sample_ids <- dir(file.path('kallisto'))
 sample_ids <- sub("^kallisto_", "", sample_ids)
-sample_ids
 abundances <- file.path('kallisto', paste0('kallisto_', sample_ids), 'abundance.h5')
+abundances
 ```
 
 ### 2. Loading the annotation
@@ -44,12 +44,11 @@ Then will have to load the information for the annotation. And make the read cou
 sampleTable <- read.csv(params$annotation, row.names = 1)
 ```
 
-We are going to make sure we analyse the exactly same samples we have between sample table and count data.
+We are going to make sure we analyse the exactly same samples we have between sample table and abundances data.
 
 ```{r}
-# Match and xtract samples for the analysis and keep as a matrix
-countdata <- as.matrix(counts)[, colnames(counts) %in% rownames(sampleTable)]
-head(countdata)
+sample_ids
+sampleTable
 ```
 
 ### 3. Setting the condition of interest
@@ -76,7 +75,7 @@ suppressMessages({
 
 Firstm we'll load the gene info
 
-```{r cache=TRUE}
+```{r}
 mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
   dataset = "hsapiens_gene_ensembl",
   host = "may2015.archive.ensembl.org")
@@ -242,4 +241,12 @@ volcanoplot <- function (res, lfcthresh=2, sigthresh=0.05, main="Volcano Plot", 
 
 ```{r}
 volcanoplot(resdata, lfcthresh=2, sigthresh=0.01, textcx=.8, xlim=c(-2.3, 2))
+```
+
+## FGSEA on DESeq results
+
+```{r}
+res <- results(dds, tidy = TRUE)
+res
+# readr::write_csv(res, path="deseq-results-tidy.csv")
 ```

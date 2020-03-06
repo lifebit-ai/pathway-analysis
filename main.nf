@@ -92,7 +92,7 @@ process mapping {
 }
 
 /*--------------------------------------------------
-  Run differential gene expression analysis 
+  Run differential gene expression and pathway analysis 
 ---------------------------------------------------*/
 
 process gene_expression {
@@ -109,10 +109,10 @@ process gene_expression {
   file(go) from go_pathways
 
   output:
-  file("{MultiQC,diffexpr-results.csv}") into results
+  file("{MultiQC,diffexpr-results.csv,deseq-results-tidy.csv}") into results
 
   script:
-  // TODO: pass arg for `kallisto_dir to Rmd
+  // TODO: pass arg for `kallisto_dir` to Rmd
   """
   # copy the rmarkdown into the pwd
   cp $rmarkdown tmp && mv tmp $rmarkdown

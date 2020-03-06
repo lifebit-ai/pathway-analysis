@@ -92,7 +92,7 @@ process mapping {
 }
 
 /*--------------------------------------------------
-  Run differential gene expression and pathway analysis 
+  Run differential gene expression
 ---------------------------------------------------*/
 
 process gene_expression {
@@ -103,20 +103,41 @@ process gene_expression {
   file('kallisto/') from kallisto_out_dirs.collect()
   file(annotation) from annotation
   file(rmarkdown) from rmarkdown
+
+  output:
+  file("{MultiQC,diffexpr-results.csv}") into diffexpr_results
+  file("deseq-results-tidy.csv") into deseq_results
+
+  script:
+  // TODO: pass arg for `kallisto_dir` to Rmd?
+  """
+  # copy the rmarkdown into the pwd
+  cp $rmarkdown tmp && mv tmp $rmarkdown
+  R -e "rmarkdown::render('${rmarkdown}', params = list(annotation='${annotation}',condition='${params.condition}')"
+  mkdir MultiQC && mv DE_with_DEseq2.html MultiQC/multiqc_report.html
+  """
+}
+
+/*--------------------------------------------------
+  Perform pathway analysis 
+---------------------------------------------------*/
+
+process pathway_analysis {
+  tag "$deseq_results"
+  publishDir params.outdir, mode: 'copy'
+
+  input:
+  file(deseq_results) into deseq_results
   file(hallmark) from hallmark_pathways
   file(kegg) from kegg_pathways
   file(mir) from mir_pathways
   file(go) from go_pathways
 
   output:
-  file("{MultiQC,diffexpr-results.csv,deseq-results-tidy.csv}") into results
+  file("*.{csv,png}") into results
 
   script:
-  // TODO: pass arg for `kallisto_dir` to Rmd
   """
-  # copy the rmarkdown into the pwd
-  cp $rmarkdown tmp && mv tmp $rmarkdown
-  R -e "rmarkdown::render('${rmarkdown}', params = list(annotation='${annotation}',condition='${params.condition}',hallmark='${hallmark}',kegg='${kegg}',mir='${mir}',go='${go}'))"
-  mkdir MultiQC && mv DE_with_DEseq2.html MultiQC/multiqc_report.html
+  pathway_analysis.R $deseq_results $hallmark $kegg $mir $go
   """
 }  

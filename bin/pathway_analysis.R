@@ -5,7 +5,7 @@ library(fgsea)
 library(tidyverse)
 
 args = commandArgs(trailingOnly=TRUE)
-deseq_results <- args[1] # deseq-results-tidy.csv
+deseq_results <- args[1] # deseq_results.csv
 hallmark      <- args[2] # h.all.v6.2.symbols.gmt
 kegg          <- args[3] # c2.cp.kegg.v6.2.symbols.gmt
 mir           <- args[4] # c3.mir.v6.2.symbols.gmt
@@ -79,9 +79,13 @@ go_pathways <- fgsea(pathways=gmtPathways(go), ranks, nperm=1000) %>%
   as_tibble() %>% 
   arrange(padj)
 
-# TODO: save the following:
-# fgseaResTidy
-# hallmark_pathways
-# kegg_pathways
-# mir_pathways
-# go_pathways
+write_list <- function(list, file) {
+  df <- data.frame(pathway=list)
+  data.table::fwrite(df, file=file)
+}
+
+data.table::fwrite(fgseaResTidy, file='fgsea_results.csv')
+write_list(hallmark_pathways,'hallmark_pathways.txt')
+write_list(kegg_pathways,'kegg_pathways.txt')
+write_list(mir_pathways,'mir_pathways.txt')
+write_list(go_pathways,'go_pathways.txt')

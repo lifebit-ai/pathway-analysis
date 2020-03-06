@@ -188,8 +188,6 @@ res <- res[order(res$padj), ]
 resdata <- merge(as.data.frame(res), as.data.frame(counts(dds, normalized=TRUE)), by="row.names", sort=FALSE)
 names(resdata)[1] <- "Gene"
 head(resdata)
-## Write results
-write.csv(resdata, file="diffexpr-results.csv")
 ```
 
 ### Histogram of p-value
@@ -239,4 +237,13 @@ volcanoplot <- function (res, lfcthresh=2, sigthresh=0.05, main="Volcano Plot", 
 
 ```{r}
 volcanoplot(resdata, lfcthresh=2, sigthresh=0.01, textcx=.8, xlim=c(-2.3, 2))
+```
+
+### Save the DESeq2 results	
+
+```{r}
+suppressMessages(library(tidyverse))
+res <- results(dds, tidy = TRUE)	
+res	
+readr::write_csv(res, path="deseq_results.csv")	
 ```

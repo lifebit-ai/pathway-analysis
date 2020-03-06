@@ -73,7 +73,7 @@ process index {
 
 process mapping {
   tag "$name"
-  publishDir params.outdir, mode: 'copy'
+  publishDir "${params.outdir}/kallisto", mode: 'copy'
 
   input:
   each file(index) from transcriptome_index
@@ -106,15 +106,16 @@ process gene_expression {
 
   output:
   file("{MultiQC,diffexpr-results.csv}") into diffexpr_results
-  file("deseq-results-tidy.csv") into deseq_results
+  file("deseq/deseq_results.csv") into deseq_results
 
   script:
   // TODO: pass arg for `kallisto_dir` to Rmd?
   """
   # copy the rmarkdown into the pwd
   cp $rmarkdown tmp && mv tmp $rmarkdown
-  R -e "rmarkdown::render('${rmarkdown}', params = list(annotation='${annotation}',condition='${params.condition}')"
-  mkdir MultiQC && mv DE_with_DEseq2.html MultiQC/multiqc_report.html
+  mkdir MultiQC deseq
+  R -e "rmarkdown::render('${rmarkdown}', params = list(annotation='${annotation}',condition='${params.condition}'))"
+  mv DE_with_DEseq2.html MultiQC/multiqc_report.html && mv deseq_results.csv deseq
   """
 }
 
@@ -124,17 +125,17 @@ process gene_expression {
 
 process pathway_analysis {
   tag "$deseq_results"
-  publishDir params.outdir, mode: 'copy'
+  publishDir "${params.outdir}/fgsea", mode: 'copy'
 
   input:
-  file(deseq_results) into deseq_results
+  file(deseq_results) from deseq_results
   file(hallmark) from hallmark_pathways
   file(kegg) from kegg_pathways
   file(mir) from mir_pathways
   file(go) from go_pathways
 
   output:
-  file("*.{csv,png}") into results
+  file("*.{csv,png,txt}") into results
 
   script:
   """

@@ -30,6 +30,23 @@ Channel
   .ifEmpty { exit 1, "Cannot find R Markdown file : ${params.rmarkdown}" }
   .set { rmarkdown }
 
+Channel
+  .fromPath( params.hallmark_pathways )
+  .ifEmpty { exit 1, "Cannot find Hallmark pathways file : ${params.hallmark_pathways}" }
+  .set { hallmark_pathways }
+Channel
+  .fromPath( params.kegg_pathways )
+  .ifEmpty { exit 1, "Cannot find KEGG pathways file : ${params.kegg_pathways}" }
+  .set { kegg_pathways }
+Channel
+  .fromPath( params.mir_pathways )
+  .ifEmpty { exit 1, "Cannot find miR targets file : ${params.mir_pathways}" }
+  .set { mir_pathways }
+Channel
+  .fromPath( params.go_pathways )
+  .ifEmpty { exit 1, "Cannot find GO annotations file : ${params.go_pathways}" }
+  .set { go_pathways }
+
 /*--------------------------------------------------
   Index the transcriptome
 ---------------------------------------------------*/
@@ -86,15 +103,20 @@ process gene_expression {
   file('kallisto/') from kallisto_out_dirs.collect()
   file(annotation) from annotation
   file(rmarkdown) from rmarkdown
+  file(hallmark) from hallmark_pathways
+  file(kegg) from kegg_pathways
+  file(mir) from mir_pathways
+  file(go) from go_pathways
 
   output:
   file("{MultiQC,diffexpr-results.csv}") into results
 
   script:
+  // TODO: pass arg for `kallisto_dir to Rmd
   """
   # copy the rmarkdown into the pwd
   cp $rmarkdown tmp && mv tmp $rmarkdown
-  R -e "rmarkdown::render('${rmarkdown}', params = list(counts='merged_abundances.tsv',annotation='${annotation}',condition='${params.condition}'))"
+  R -e "rmarkdown::render('${rmarkdown}', params = list(annotation='${annotation}',condition='${params.condition}',hallmark='${hallmark}',kegg='${kegg}',mir='${mir}',go='${go}'))"
   mkdir MultiQC && mv DE_with_DEseq2.html MultiQC/multiqc_report.html
   """
-}
+}  

@@ -13,23 +13,19 @@ Channel
   .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
   .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
   .set { reads }
-
 Channel
   .fromPath( params.transcriptome )
   .map { file -> tuple(file.baseName, file) }
   .ifEmpty { exit 1, "Cannot find any transcriptome file : ${params.transcriptome}" }
   .set { transcriptome }
-
 Channel
   .fromPath( params.annotation )
   .ifEmpty { exit 1, "Cannot find annotation/experiment file : ${params.annotation}" }
   .set { annotation }
-
 Channel
   .fromPath( params.rmarkdown )
   .ifEmpty { exit 1, "Cannot find R Markdown file : ${params.rmarkdown}" }
   .set { rmarkdown }
-
 Channel
   .fromPath( params.hallmark_pathways )
   .ifEmpty { exit 1, "Cannot find Hallmark pathways file : ${params.hallmark_pathways}" }
@@ -73,7 +69,7 @@ process index {
 
 process mapping {
   tag "$name"
-  publishDir "${params.outdir}/kallisto", mode: 'copy'
+  publishDir "${params.outdir}/mapping", mode: 'copy'
 
   input:
   each file(index) from transcriptome_index
@@ -97,7 +93,7 @@ process mapping {
 
 process gene_expression {
   tag "$annotation"
-  publishDir params.outdir, mode: 'copy'
+  publishDir "${params.outdir}/gene_expression", mode: 'copy'
 
   input:
   file('kallisto/') from kallisto_out_dirs.collect()
@@ -105,17 +101,12 @@ process gene_expression {
   file(rmarkdown) from rmarkdown
 
   output:
-  file("{MultiQC,diffexpr-results.csv}") into diffexpr_results
-  file("deseq/deseq_results.csv") into deseq_results
+  file("deseq_results.csv") into deseq_results
+  file("*.png") into gene_expression_plots
 
   script:
-  // TODO: pass arg for `kallisto_dir` to Rmd?
   """
-  # copy the rmarkdown into the pwd
-  cp $rmarkdown tmp && mv tmp $rmarkdown
-  mkdir MultiQC deseq
-  R -e "rmarkdown::render('${rmarkdown}', params = list(annotation='${annotation}',condition='${params.condition}'))"
-  mv DE_with_DEseq2.html MultiQC/multiqc_report.html && mv deseq_results.csv deseq
+  gene_expression.R $annotation $params.condition kallisto
   """
 }
 
@@ -125,7 +116,7 @@ process gene_expression {
 
 process pathway_analysis {
   tag "$deseq_results"
-  publishDir "${params.outdir}/fgsea", mode: 'copy'
+  publishDir "${params.outdir}/pathway_analysis", mode: 'copy'
 
   input:
   file(deseq_results) from deseq_results

@@ -1,0 +1,45 @@
+---
+title: "Pathway Analysis Report"
+output: 
+  flexdashboard::flex_dashboard:
+    vertical_layout: scroll
+---
+
+## Differential Gene Expression Analysis
+   
+### Dispersion Plot
+
+![Dispersion Plot](dispersion_plot.png)
+
+### Histogram
+
+![Histogram](histogram.png)
+
+### Sample Distance Matrix
+
+![Sample Distance Matrix](sample_distance_matrix.png)
+
+### PCA Biplot
+
+![PCA Biplot](pca_biplot.png)
+
+### Differential Gene Expression Results
+
+```{r}
+deseq_results <- read.csv("deseq_results.csv")
+DT::datatable(deseq_results, options = list(
+  pageLength = 25
+))
+```
+
+### Histogram of p-value
+
+![Histogram of p-value](histogram_of_p_values.png)
+
+### MA Plot
+
+![MA Plot](ma_plot.png)
+
+### Volcano plot
+
+![Volcano plot](volcano_plot.png)

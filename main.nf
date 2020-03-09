@@ -132,4 +132,29 @@ process pathway_analysis {
   """
   pathway_analysis.R $deseq_results $hallmark $kegg $mir $go
   """
-}  
+}
+
+/*--------------------------------------------------
+  Produce R Markdown report
+---------------------------------------------------*/
+
+process report {
+  publishDir params.outdir, mode: 'copy'
+
+  input:
+  file(deseq) from deseq_results
+  file(gene_expression_plots) into gene_expression_plots
+  file(pathway_analysis) from results
+  file rmarkdown from rmarkdown
+
+  output:
+  file('MultiQC') into report
+
+  script:
+  """
+  # copy the rmarkdown into the pwd
+  cp $rmarkdown tmp && mv tmp $rmarkdown
+  R -e "rmarkdown::render('${rmarkdown}')"
+  mkdir MultiQC && mv ${rmarkdown.baseName}.html MultiQC/multiqc_report.html
+  """
+}

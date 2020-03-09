@@ -2,10 +2,11 @@
 title: "Pathway Analysis Report"
 output: 
   flexdashboard::flex_dashboard:
-    vertical_layout: scroll
+    orientation: rows
 ---
 
-## Differential Gene Expression Analysis
+Row {.tabset .tabset-fade}
+-------------------------------------
    
 ### Dispersion Plot
 
@@ -27,9 +28,7 @@ output:
 
 ```{r}
 deseq_results <- read.csv("deseq_results.csv")
-DT::datatable(deseq_results, options = list(
-  pageLength = 25
-))
+summary(deseq_results)
 ```
 
 ### Histogram of p-value
@@ -43,3 +42,41 @@ DT::datatable(deseq_results, options = list(
 ### Volcano plot
 
 ![Volcano plot](volcano_plot.png)
+
+Row {.tabset .tabset-fade}
+-------------------------------------
+
+### Hallmark Pathways GSEA Results
+
+```{r}
+fgsea_results <- read.csv("fgsea_results.csv")
+summary(fgsea_results)
+```
+
+### Hallmark Pathways GSEA
+
+![Hallmark Pathways GSEA](hallmark_pathways_gsea.png)
+
+### Hallmark pathways
+```{r}
+hallmark_pathways <- read.csv("hallmark_pathways.txt")
+summary(hallmark_pathways)
+```
+
+### KEGG pathways
+```{r}
+kegg_pathways <- read.csv("kegg_pathways.txt")
+summary(kegg_pathways)
+```
+
+### miR targets
+```{r}
+mir_pathways <- read.csv("mir_pathways.txt")
+summary(mir_pathways)
+```
+
+### GO annotations
+```{r}
+go_pathways <- read.csv("go_pathways.txt")
+summary(go_pathways)
+```

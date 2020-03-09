@@ -98,10 +98,9 @@ process gene_expression {
   input:
   file('kallisto/') from kallisto_out_dirs.collect()
   file(annotation) from annotation
-  file(rmarkdown) from rmarkdown
 
   output:
-  file("deseq_results.csv") into deseq_results
+  file("deseq_results.csv") into (deseq_results, deseq_results_report)
   file("*.png") into gene_expression_plots
 
   script:
@@ -142,10 +141,10 @@ process report {
   publishDir params.outdir, mode: 'copy'
 
   input:
-  file(deseq) from deseq_results
-  file(gene_expression_plots) into gene_expression_plots
+  file(deseq) from deseq_results_report
+  file(gene_expression_plots) from gene_expression_plots
   file(pathway_analysis) from results
-  file rmarkdown from rmarkdown
+  file(rmarkdown) from rmarkdown
 
   output:
   file('MultiQC') into report

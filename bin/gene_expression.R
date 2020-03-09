@@ -24,6 +24,8 @@ abundances <- file.path(kallisto_dir, paste0('kallisto_', sample_ids), 'abundanc
 
 # 2. Load the annotation (sample table with metadata)
 sampleTable <- read.csv(annotation, row.names = 1)
+# Order the rows
+sampleTable <- sampleTable[ order(row.names(sampleTable)), ]
 
 # 3. Set the condition of interest
 condition_name <- condition

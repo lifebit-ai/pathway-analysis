@@ -10,18 +10,18 @@
 */
 
 Channel
-  .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-  .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
+  .fromPath(params.experiment)
+  .ifEmpty { exit 1, "Cannot find experiment file : ${params.experiment}" }
+  .into { experiment; experiment_to_reads }
+experiment_to_reads
+  .splitCsv(skip:1)
+  .map { sample_id, treatment, fastq -> [sample_id, file(fastq)] }
   .set { reads }
 Channel
   .fromPath( params.transcriptome )
   .map { file -> tuple(file.baseName, file) }
   .ifEmpty { exit 1, "Cannot find any transcriptome file : ${params.transcriptome}" }
   .set { transcriptome }
-Channel
-  .fromPath( params.annotation )
-  .ifEmpty { exit 1, "Cannot find annotation/experiment file : ${params.annotation}" }
-  .set { annotation }
 Channel
   .fromPath( params.rmarkdown )
   .ifEmpty { exit 1, "Cannot find R Markdown file : ${params.rmarkdown}" }
@@ -92,12 +92,12 @@ process mapping {
 ---------------------------------------------------*/
 
 process gene_expression {
-  tag "$annotation"
+  tag "$experiment"
   publishDir "${params.outdir}/gene_expression", mode: 'copy'
 
   input:
   file('kallisto/') from kallisto_out_dirs.collect()
-  file(annotation) from annotation
+  file(experiment) from experiment
 
   output:
   file("deseq_results.csv") into (deseq_results, deseq_results_report)
@@ -105,7 +105,7 @@ process gene_expression {
 
   script:
   """
-  gene_expression.R $annotation $params.condition kallisto
+  gene_expression.R $experiment $params.condition kallisto
   """
 }
 

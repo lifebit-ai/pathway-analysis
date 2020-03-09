@@ -26,6 +26,7 @@ abundances <- file.path(kallisto_dir, paste0('kallisto_', sample_ids), 'abundanc
 sampleTable <- read.csv(annotation, row.names = 1)
 
 # 3. Set the condition of interest
+condition_name <- condition
 # Select/extract the one condition we want to analyse, eg the treatment was used on each sample:
 condition <- unlist(sampleTable[condition])
 
@@ -47,7 +48,7 @@ ttg <- dplyr::select(ttg, TXNAME = ensembl_transcript_id,
 
 # Create the DEseq dataset object using the abundances and the sample data
 txi_kallisto <- tximport(abundances, type='kallisto', tx2gene=ttg)
-dds <- DESeqDataSetFromTximport(txi=txi_kallisto, colData=sampleTable, design= as.formula(paste("~", condition)))
+dds <- DESeqDataSetFromTximport(txi=txi_kallisto, colData=sampleTable, design= as.formula(paste("~", condition_name)))
 
 # Run the Differential Expression
 dds <- DESeq(dds)
@@ -61,7 +62,7 @@ plotDispEsts(dds, main="Dispersion plot")
 # Apply log transformation to the read counts and will try to cluster the samples according the log transform counts
 # Regularized log transformation for clustering/heatmaps, etc
 rld <- rlogTransformation(dds)
-png("dispersion_plot.png")
+png("histogram.png")
 hist(assay(rld))
 
 # Sample Distance Matrix
@@ -101,7 +102,7 @@ rld_pca <- function (rld, intgroup = "condition", ntop = 500, colors=NULL, legen
 }
 # PCA visualization to see how the variation separates samples, but also how mixed
 png("pca_biplot.png")
-rld_pca(rld, colors=mycols, intgroup=params$condition, xlim=c(-75, 35))
+rld_pca(rld, colors=mycols, intgroup=condition_name, xlim=c(-75, 35))
 
 # Results table of top genes by adjusted p-value
 # Filter and to extract genes based on certain thresholds. Apply filter in order to filter for p-values and adjusted p-values on top of the results table.

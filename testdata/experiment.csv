@@ -1,7 +1,7 @@
-sample_id,treatment
-SRR493366,control
-SRR493367,control
-SRR493368,control
-SRR493369,test
-SRR493370,test
-SRR493371,test
+sample_id,treatment,fastq
+SRR493366,control,https://github.com/lifebit-ai/kallisto-nf/raw/master/tutorial/reads/SRR493366.fastq
+SRR493367,control,https://github.com/lifebit-ai/kallisto-nf/raw/master/tutorial/reads/SRR493367.fastq
+SRR493368,control,https://github.com/lifebit-ai/kallisto-nf/raw/master/tutorial/reads/SRR493368.fastq
+SRR493369,test,https://github.com/lifebit-ai/kallisto-nf/raw/master/tutorial/reads/SRR493369.fastq
+SRR493370,test,https://github.com/lifebit-ai/kallisto-nf/raw/master/tutorial/reads/SRR493370.fastq
+SRR493371,test,https://github.com/lifebit-ai/kallisto-nf/raw/master/tutorial/reads/SRR493371.fastq

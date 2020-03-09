@@ -1,0 +1,82 @@
+---
+title: "Pathway Analysis Report"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+Row {.tabset .tabset-fade}
+-------------------------------------
+   
+### Dispersion Plot
+
+![Dispersion Plot](dispersion_plot.png)
+
+### Histogram
+
+![Histogram](histogram.png)
+
+### Sample Distance Matrix
+
+![Sample Distance Matrix](sample_distance_matrix.png)
+
+### PCA Biplot
+
+![PCA Biplot](pca_biplot.png)
+
+### Differential Gene Expression Results
+
+```{r}
+deseq_results <- read.csv("deseq_results.csv")
+summary(deseq_results)
+```
+
+### Histogram of p-value
+
+![Histogram of p-value](histogram_of_p_values.png)
+
+### MA Plot
+
+![MA Plot](ma_plot.png)
+
+### Volcano plot
+
+![Volcano plot](volcano_plot.png)
+
+Row {.tabset .tabset-fade}
+-------------------------------------
+
+### Hallmark Pathways GSEA Results
+
+```{r}
+fgsea_results <- read.csv("fgsea_results.csv")
+summary(fgsea_results)
+```
+
+### Hallmark Pathways GSEA
+
+![Hallmark Pathways GSEA](hallmark_pathways_gsea.png)
+
+### Hallmark pathways
+```{r}
+hallmark_pathways <- read.csv("hallmark_pathways.txt")
+summary(hallmark_pathways)
+```
+
+### KEGG pathways
+```{r}
+kegg_pathways <- read.csv("kegg_pathways.txt")
+summary(kegg_pathways)
+```
+
+### miR targets
+```{r}
+mir_pathways <- read.csv("mir_pathways.txt")
+summary(mir_pathways)
+```
+
+### GO annotations
+```{r}
+go_pathways <- read.csv("go_pathways.txt")
+summary(go_pathways)
+```

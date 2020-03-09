@@ -21,4 +21,5 @@ dependencies:
   - r-rcolorbrewer=1.1_2
   - r-calibrate=1.7.2
   - r-dt
+  - r-flexdashboard
   - fonts-anaconda=1

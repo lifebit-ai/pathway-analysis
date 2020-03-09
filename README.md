@@ -15,5 +15,5 @@ wget https://github.com/lifebit-ai/kallisto-nf/raw/master/tutorial/reads/SRR4933
 wget https://github.com/lifebit-ai/kallisto-nf/raw/master/tutorial/reads/SRR493371.fastq && \
 cd ..
 
-nextflow run main.nf --reads "testdata/*.fastq" --singleEnd --annotation testdata/experiment.csv --transcriptome testdata/transcriptome.fa  --condition treatment
+nextflow run main.nf --experiment testdata/experiment.csv --transcriptome testdata/transcriptome.fa  --condition treatment
 ```

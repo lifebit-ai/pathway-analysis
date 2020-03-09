@@ -48,7 +48,7 @@ ttg <- dplyr::select(ttg, TXNAME = ensembl_transcript_id,
   GENEID = ensembl_gene_id)
 
 # Create the DEseq dataset object using the abundances and the sample data
-txi_kallisto <- tximport(abundances, type='kallisto', tx2gene=ttg)
+txi_kallisto <- tximport(abundances, type='kallisto', tx2gene=ttg, ignoreTxVersion=TRUE)
 dds <- DESeqDataSetFromTximport(txi=txi_kallisto, colData=sampleTable, design= as.formula(paste("~", condition_name)))
 
 # Run the Differential Expression

@@ -37,9 +37,8 @@ condition <- unlist(sampleTable[condition])
 ###################################
 
 # Load the gene info
-mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-  dataset = "hsapiens_gene_ensembl",
-  host = "may2015.archive.ensembl.org")
+mart <- biomaRt::useMart(biomart = "ensembl",
+  dataset="hsapiens_gene_ensembl")
 ttg <- biomaRt::getBM(
   attributes = c("ensembl_transcript_id", "transcript_version",
   "ensembl_gene_id", "external_gene_name", "description",

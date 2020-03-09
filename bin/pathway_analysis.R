@@ -26,7 +26,7 @@ ens2symbol <- as_tibble(ens2symbol)
 # join them
 res <- inner_join(res, ens2symbol, by=c("row"="ENSEMBL"))
 
-# Further, all you’ll care about later on is the gene symbol and the test statistic. Get just those, and remove the NAs. Finally, if you have multiple test statistics for the same symbol, you’ll want to deal with that in some way. Here I’m just averaging them.
+# Get just the gene symbol and the test statistic, and remove the NAs. Finally, if you have multiple test statistics for the same symbol, you’ll want to deal with that in some way. Here I’m just averaging them.
 res2 <- res %>% 
   dplyr::select(SYMBOL, stat) %>% 
   na.omit() %>% 
@@ -49,7 +49,6 @@ fgseaResTidy <- fgseaRes %>%
   arrange(desc(NES))
 
 # Plot the normalized enrichment scores. Color the bar indicating whether or not the pathway was significant:
-# TODO: save plot
 ggplot(fgseaResTidy, aes(reorder(pathway, NES), NES)) +
   geom_col(aes(fill=padj<0.05)) +
   coord_flip() +
@@ -79,6 +78,7 @@ go_pathways <- fgsea(pathways=gmtPathways(go), ranks, nperm=1000) %>%
   as_tibble() %>% 
   arrange(padj)
 
+# Write output files
 write_list <- function(list, file) {
   df <- data.frame(pathway=list)
   data.table::fwrite(df, file=file)
